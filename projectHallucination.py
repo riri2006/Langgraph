@@ -181,7 +181,7 @@ def rag_node(state: State):
 
 graph = StateGraph(State)
 
-graph.add_node("router", router)
+# graph.add_node("router", router)
 graph.add_node("tavily", tavily)
 graph.add_node("rag", rag_node)
 
