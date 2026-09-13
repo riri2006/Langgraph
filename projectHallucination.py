@@ -109,7 +109,8 @@ class Rag():
             result = llm.invoke(prompt)
 
             return result.content
-
+def router(state:State):
+    r = llm.invoke()
 def tavily(state: State):
 
     tool = TavilySearch(max_results=2)
@@ -181,7 +182,7 @@ def rag_node(state: State):
 
 graph = StateGraph(State)
 
-# graph.add_node("router", router)
+graph.add_node("router", router)
 graph.add_node("tavily", tavily)
 graph.add_node("rag", rag_node)
 
