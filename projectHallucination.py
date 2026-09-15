@@ -206,7 +206,7 @@ app = graph.compile()
 query = input("Enter your question: ")
 
 result = app.invoke(
-    {"query": query}
+    State(query=query)
 )
 
 print("\nAnswer:")
