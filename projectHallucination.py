@@ -70,49 +70,93 @@ class Rag():
             embedding=self.embeddings,
             persist_directory="./ph_db"
         )
-        def answer(self, query):
-            response = self.vdb.similarity_search(
-                query=query,
-                k=5
-            )
-            context = "\n\n".join(
-                doc.page_content
-                for doc in response
-            )
+    def answer(self, query):
+        response = self.vdb.similarity_search(
+            query=query,
+            k=5
+        )
+        context = "\n\n".join(
+            doc.page_content
+            for doc in response
+        )
 
-            prompt = f"""
-                You are a strict document-grounded AI assistant.
+        prompt = f"""
+            You are a strict document-grounded AI assistant.
 
-                User Question:
-                {query}
-                Retrieved Document Context:
-                {context}
-                Answer the question using ONLY the information
-                supported by the document context.
-                Rules:
-                1. If the answer is available in the document,
-                answer clearly and accurately.
-                2. Do not invent, assume, guess, or hallucinate
-                information.
-                3. If the document does not contain enough information,
-                say:
-                "I could not find this information in the
-                provided reference document."
-                4. If only part of the answer is available,
-                provide only the supported information.
-                5. If the user asks for an explanation or meaning,
-                explain the document information in simple language.
-                6. Do not use unrelated general knowledge.
-                7. Keep the answer simple and direct.
-                """
+            User Question:
+            {query}
+            Retrieved Document Context:
+            {context}
+            Answer the question using ONLY the information
+            supported by the document context.
+            Rules:
+            1. If the answer is available in the document,
+            answer clearly and accurately.
+            2. Do not invent, assume, guess, or hallucinate
+            information.
+            3. If the document does not contain enough information,
+            say:
+            "I could not find this information in the
+            provided reference document."
+            4. If only part of the answer is available,
+            provide only the supported information.
+            5. If the user asks for an explanation or meaning,
+            explain the document information in simple language.
+            6. Do not use unrelated general knowledge.
+            7. Keep the answer simple and direct.
+            """
 
-            result = llm.invoke(prompt)
+        result = llm.invoke(prompt)
 
-            return result.content
-def router(state:State):
-    r = llm.invoke(f"Classify the question in three category and answer only that wheter it belongs to tavily, rag according to question: {state.query}")
-    return {"route": r.content}
+        return result.content
+def router(state: State):
 
+    r = llm.invoke(
+        f"""
+        You are a routing classifier.
+
+        Classify the user's question into exactly ONE category.
+
+        RAG:
+        Use RAG when the answer requires any user-provided
+        document, file, image, PDF, resume, Excel, Word file,
+        or other external data provided by the user.
+
+        TAVILY:
+        Use Tavily when the answer requires information from
+        the internet or current web information.
+
+        Examples:
+
+        "What is written in this PDF?" → rag
+        "What are the skills in this resume?" → rag
+        "What is written in this image?" → rag
+        "Summarize my document" → rag
+        "What is today's weather?" → tavily
+        "What is the latest AI news?" → tavily
+        "Who is the current president of India?" → tavily
+
+        IMPORTANT:
+        Do NOT answer the question.
+        Return ONLY:
+        rag
+        OR
+        tavily
+
+        User Question:
+        {state.query}
+        """
+    )
+
+    route = r.content.strip().lower()
+
+    if "rag" in route:
+        return {"route": "rag"}
+
+    if "tavily" in route:
+        return {"route": "tavily"}
+
+    return {"route": "rag"}
 def tavily(state: State):
 
     tool = TavilySearch(max_results=2)
@@ -203,11 +247,15 @@ graph.add_edge("rag", END)
 
 app = graph.compile()
 
-query = input("Enter your question: ")
+while True:
+    query = input("Enter your question: ")
+    if query.lower() in ["Exit","Bye","Quit","Terminate"]:
+        print("Terminating conversation.. Thank u have a nice day..")
+        break
 
-result = app.invoke(
-    State(query=query)
-)
+    result = app.invoke(
+        State(query=query)
+    )
 
-print("\nAnswer:")
-print(result["answer"])
+    print("\nAnswer:")
+    print(result["answer"])
