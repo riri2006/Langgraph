@@ -110,7 +110,9 @@ class Rag():
 
             return result.content
 def router(state:State):
-    r = llm.invoke()
+    r = llm.invoke(f"Classify the question in three category and answer only that wheter it belongs to tavily, llm, addition according to question: {state.query}")
+    return {"route": r.content}
+
 def tavily(state: State):
 
     tool = TavilySearch(max_results=2)
