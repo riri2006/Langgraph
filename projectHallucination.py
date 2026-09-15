@@ -110,7 +110,7 @@ class Rag():
 
             return result.content
 def router(state:State):
-    r = llm.invoke(f"Classify the question in three category and answer only that wheter it belongs to tavily, llm, addition according to question: {state.query}")
+    r = llm.invoke(f"Classify the question in three category and answer only that wheter it belongs to tavily, rag according to question: {state.query}")
     return {"route": r.content}
 
 def tavily(state: State):
@@ -200,3 +200,14 @@ graph.add_conditional_edges(
 
 graph.add_edge("tavily", END)
 graph.add_edge("rag", END)
+
+app = graph.compile()
+
+query = input("Enter your question: ")
+
+result = app.invoke(
+    {"query": query}
+)
+
+print("\nAnswer:")
+print(result["answer"])
