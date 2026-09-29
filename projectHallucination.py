@@ -9,5 +9,4 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 load_dotenv()
 
-llm = ChatGroq(model="openai/gpt-oss-20b")
-client=
+llmm = ChatGroq(model="openai/gpt-oss-20b")
