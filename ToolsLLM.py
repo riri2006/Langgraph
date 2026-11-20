@@ -86,7 +86,6 @@ graph.add_node("PythonNode", PythonTool)
 graph.add_node("WikiNode", WikiTool)
 
 graph.add_edge(START, "Router")
-
 graph.add_conditional_edges(
     "Router",
     decide,
@@ -100,8 +99,6 @@ graph.add_edge("WikiNode", END)
 
 demo = graph.compile()
 query = input("Ask: ")
-
 result = demo.invoke({
     "query": query })
-
 print("Assistant:", result["answer"])
