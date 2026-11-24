@@ -26,14 +26,11 @@ builder.add_node("chatbot", chatbot)
 builder.add_edge(START, "chatbot")
 builder.add_edge("chatbot", END)
 
-
-# Persistent database
 with SqliteSaver.from_conn_string("chat_history.sqlite") as memory:
 
     app = builder.compile(checkpointer=memory)
 
-    # IMPORTANT: Same thread ID every time
-    config = {
+    configuration = {
         "configurable": {
             "thread_id": "riddhi_personal_chat"
         }
@@ -52,7 +49,6 @@ with SqliteSaver.from_conn_string("chat_history.sqlite") as memory:
                     HumanMessage(content=query)
                 ]
             },
-            config=config
+            config=configuration
         )
-
         print("\nAI:", response["messages"][-1].content)
